@@ -1,0 +1,50 @@
+### TEST GET /health
+GET http://localhost:3000/health
+
+### TEST POST register
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@test.com",
+  "password": "testpassword"
+}
+
+### TEST POST login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@test.com",
+  "password": "testpassword"
+}
+
+### TEST GET /todos (protected)
+### Replace TOKEN_HERE with the token returned from login
+GET http://localhost:3000/todos
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODUxMjMzNCwiZXhwIjoxNzc4NTE1OTM0fQ.bIuBwfBFONyGWB6jrayfCZoDrH759krylAJOd8sLQ1s
+
+### TEST CREATE Todo
+POST http://localhost:3000/todos
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODUxMjMzNCwiZXhwIjoxNzc4NTE1OTM0fQ.bIuBwfBFONyGWB6jrayfCZoDrH759krylAJOd8sLQ1s
+
+{
+  "title": "Test Todo",
+  "description": "My first todo"
+}
+
+### TEST UPDATE Todo
+PUT http://localhost:3000/todos/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODUxMjMzNCwiZXhwIjoxNzc4NTE1OTM0fQ.bIuBwfBFONyGWB6jrayfCZoDrH759krylAJOd8sLQ1s
+
+{
+  "title": "Updated Test Todo",
+  "status": "done"
+}
+
+### TEST DELETE Todo
+DELETE http://localhost:3000/todos/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODUxMjMzNCwiZXhwIjoxNzc4NTE1OTM0fQ.bIuBwfBFONyGWB6jrayfCZoDrH759krylAJOd8sLQ1s
