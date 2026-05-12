@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage";
+import TodosPage from "./pages/TodosPage";
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/register" element={<RegistrationPage />} />
+        <Route path="/todos" element={<TodosPage />} />
       </Routes>
     </BrowserRouter>
   );
