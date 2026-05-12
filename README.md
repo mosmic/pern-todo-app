@@ -4,88 +4,132 @@ A full-stack todo application built with React (Vite + Redux) on the frontend an
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) v18 or later
-- [Docker](https://www.docker.com/) (for the database)
+- [Docker](https://www.docker.com/) — everything runs inside containers, no local Node.js required
 
 ---
 
-## 1. Start the database
+## 1. First-time setup
 
-```bash
-docker-compose up -d
-```
-
-This starts a PostgreSQL container with the schema already applied. No manual SQL commands needed.
-
----
-
-## 2. Server environment variables
+Copy the example env file and set a strong JWT secret:
 
 ```bash
 cp server/.env.example server/.env
 ```
 
-The defaults in `.env.example` match the Docker Compose configuration, so the server will connect without any changes. The only value you should update before deploying is `JWT_SECRET`:
+Generate a secure `JWT_SECRET` and paste it into `server/.env`:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
----
-
-## 3. Install dependencies
-
-```bash
-# Server
-cd server
-npm install
-
-# Client
-cd ../client
-npm install
-```
+> The DB credentials in `.env` are not used when running via Docker — the `docker-compose.yml` overrides them automatically. You only need the `.env` file to exist so the server starts without errors.
 
 ---
 
-## 4. Run the project
-
-Open two terminals.
-
-**Terminal 1 — API server** (runs on port 3000):
+## 2. Start the project
 
 ```bash
-cd server
-npm run dev
+docker compose up --build
 ```
 
-**Terminal 2 — React client** (runs on port 5173):
+Drop `--build` on subsequent starts (only needed when dependencies change or Dockerfiles change):
 
 ```bash
-cd client
-npm run dev
+docker compose up
 ```
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-The client proxies all `/api/*` requests to `http://localhost:3000`, so both must be running at the same time.
+| Service             | URL                   |
+| ------------------- | --------------------- |
+| React client (Vite) | http://localhost:5173 |
+| Express API         | http://localhost:3000 |
+| PostgreSQL          | localhost:5432        |
 
 ---
 
-## 5. Build for production
+## 3. Day-to-day workflow
+
+**Start everything:**
 
 ```bash
-# Build the server
-cd server
-npm run build        # outputs to server/dist/
-
-# Build the client
-cd ../client
-npm run build        # outputs to client/dist/
+docker compose up
 ```
 
-To run the compiled server:
+**Stop everything:**
 
 ```bash
-cd server
-npm start
+docker compose down
 ```
+
+**Rebuild after installing a new npm package:**
+
+```bash
+docker compose up --build
+```
+
+**View logs for a specific service:**
+
+```bash
+docker compose logs -f server
+docker compose logs -f client
+```
+
+**Run a command inside a container (e.g. check DB):**
+
+```bash
+docker compose exec db psql -U todo_user -d todo_db
+```
+
+Hot reload is enabled for both services — saving a file in `server/src/` or `client/src/` will reflect in the browser automatically without restarting containers.
+
+---
+
+## 4. Adding npm packages
+
+Install the package inside the container so it goes into the correct `node_modules` volume, then rebuild:
+
+```bash
+# Server example
+docker compose exec server npm install <package>
+
+# Client example
+docker compose exec client npm install <package>
+
+# Rebuild to bake the updated package.json into the image
+docker compose up --build
+```
+
+---
+
+## 5. Reset the database
+
+To wipe all data and re-apply the schema from scratch:
+
+```bash
+docker compose down -v   # removes volumes including postgres_data
+docker compose up
+```
+
+---
+
+## 6. Running without Docker (optional)
+
+If you prefer to run services locally:
+
+**Prerequisites:** Node.js v18+, a running PostgreSQL instance
+
+```bash
+# Start only the DB via Docker
+docker compose up db -d
+
+# Install dependencies
+cd server && npm install
+cd ../client && npm install
+
+# Run in separate terminals
+cd server && npm run dev      # API on port 3000
+cd client && npm run dev      # Client on port 5173
+```
+
+Note: update `DB_HOST` to `localhost` in `server/.env` when running the server outside Docker.
